@@ -7,6 +7,7 @@ import (
 	handler "github.com/mihailco/memessenger/pkg/handlers"
 	"github.com/mihailco/memessenger/pkg/repository"
 	"github.com/mihailco/memessenger/pkg/service"
+	"github.com/mihailco/memessenger/pkg/ws"
 	"github.com/sirupsen/logrus"
 
 	// "github.com/sirupsen/logrusrus"
@@ -29,8 +30,7 @@ func main() {
 		SSLmode:  viper.GetString("db.sslmode"),
 		Password: viper.GetString("db.password"),
 	})
-	//'postgres://postgres:qwerty@localhost:5436?sslmode=disable'  up
-	//postgres://postgres:postgrespw@localhost:49156
+
 	if err != nil {
 		logrus.Fatal("falled to init db: %s", err.Error())
 	}
@@ -38,6 +38,8 @@ func main() {
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
+	hub := ws.NewHub()
+	go hub.Run()
 	srv := new(meme.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err.Error())
