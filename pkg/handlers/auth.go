@@ -21,9 +21,14 @@ func (h *Handler) signUp(c *gin.Context) {
 		NewErrorResponse(c, http.StatusInternalServerError, err2.Error())
 		return
 	}
-
+	token, err2 := h.services.Authorization.GenerateToken(input.Username, input.Password)
+	if err2 != nil {
+		NewErrorResponse(c, http.StatusInternalServerError, err2.Error())
+		return
+	}
 	c.JSON(http.StatusOK, map[string]interface{}{
-		"id": id,
+		"token": token,
+		"id":    id,
 	})
 }
 

@@ -3,14 +3,17 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mihailco/memessenger/pkg/service"
+	"github.com/mihailco/memessenger/pkg/ws"
+	"github.com/sirupsen/logrus"
 )
 
 type Handler struct {
 	services *service.Service
+	hub      *ws.Hub
 }
 
-func NewHandler(serv *service.Service) *Handler {
-	return &Handler{services: serv}
+func NewHandler(serv *service.Service, hub *ws.Hub) *Handler {
+	return &Handler{services: serv, hub: hub}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
@@ -23,7 +26,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api", h.userIdentity)
 	{
-		api.GET("/messages")
+		api.GET("/messages", func(c *gin.Context) {
+			logrus.Println("new user")
+			ws.ServeWs(h.hub, c)
+		})
 		// lists := api.Group("/lists")
 		// {
 		// 	lists.POST("/")

@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  memessenger:
+    container_name: "meme"
+    build: .
+    command: ./wait-for-postgres.sh db ./memessenger
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    environment:
+      - DB_PASSWORD=postgrespw
+
+
+  db:
+    container_name: "db" 
+    image: postgres:latest
+    restart: always
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    environment:
+       POSTGRES_PASSWORD: "postgrespw"
+       POSTGRES_USER: "postgres"
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - 8080:80
+    # networks:
+    # - alln
+    environment: 
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+
+
+  migrate:
+    image: migrate/migrate
+    networks:
+      - alln
+    volumes:
+      - ./schema:/schema
+    command:
+      [
+        "migrate",
+        "-path",
+       "/schema",
+        "-database",
+        "postgres://postgres:postgrespw@localhost:49153?sslmode=disable",
+        "up"
+      ]
+
+
+
+volumes:
+  dbdata:
+
+networks:
+      alln:

@@ -2,6 +2,8 @@ package main
 
 import (
 	// _ "github.com/bmizerany/pq"
+	"os"
+
 	"github.com/joho/godotenv"
 	meme "github.com/mihailco/memessenger"
 	handler "github.com/mihailco/memessenger/pkg/handlers"
@@ -28,18 +30,20 @@ func main() {
 		Username: viper.GetString("db.username"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLmode:  viper.GetString("db.sslmode"),
-		Password: viper.GetString("db.password"),
+		Password: os.Getenv("DB_PASSWORD"),
 	})
 
 	if err != nil {
 		logrus.Fatal("falled to init db: %s", err.Error())
 	}
-	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
-	handlers := handler.NewHandler(services)
 
 	hub := ws.NewHub()
 	go hub.Run()
+	repos := repository.NewRepository(db)
+	services := service.NewService(repos)
+
+	handlers := handler.NewHandler(services, hub)
+
 	srv := new(meme.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err.Error())
