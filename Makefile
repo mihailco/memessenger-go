@@ -5,15 +5,14 @@ build:
 up:
 	docker-compose up
 
-
 run:
-	docker run memessenger -p 5432:5432
+	go run cmd/main.go
 
 test:
 	go test -v ./...
 
 migrate:
-	migrate -path ./schema -database 'postgres://postgres:postgrespw@localhost:5436?sslmode=disable' up
+	migrate -path ./schema -database 'postgres://postgres:postgrespw@localhost:8000?sslmode=disable' up
 
 swag:
 	swag init -g cmd/main.go

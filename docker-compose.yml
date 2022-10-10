@@ -1,16 +1,21 @@
 version: '3.8'
 
 services:
-  memessenger:
-    container_name: "meme"
-    build: .
-    command: ./wait-for-postgres.sh db ./memessenger
-    ports:
-      - 8000:8000
-    depends_on:
-      - db
-    environment:
-      - DB_PASSWORD=postgrespw
+  # memessenger:
+  #   image: golang
+  #   restart: always
+  #   container_name: "meme"
+  #   # build: .
+  #   # command: ./wait-for-postgres.sh db ./memessenger
+  #   ports:
+  #     - 8000:8000
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     - DB_PASSWORD=postgrespw
+  #   volumes:
+  #     - ./:/appdata
+  #   command: ["go", "run", "./appdata/cmd/main.go"]
 
 
   db:
@@ -19,6 +24,11 @@ services:
     restart: always
     volumes:
       - dbdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    command: -p 5432
+    networks:
+      - back
     environment:
        POSTGRES_PASSWORD: "postgrespw"
        POSTGRES_USER: "postgres"
@@ -26,37 +36,22 @@ services:
       - "5432:5432"
 
   pgadmin:
-    image: dpage/pgadmin4
+    container_name: "pgadmin" 
+
+    image: dpage/pgadmin4:5.1
     restart: always
     ports:
-      - 8080:80
-    # networks:
-    # - alln
+      - 80:80
+    networks:
+    - back
     environment: 
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: root
 
-
-  migrate:
-    image: migrate/migrate
-    networks:
-      - alln
-    volumes:
-      - ./schema:/schema
-    command:
-      [
-        "migrate",
-        "-path",
-       "/schema",
-        "-database",
-        "postgres://postgres:postgrespw@localhost:49153?sslmode=disable",
-        "up"
-      ]
-
-
-
 volumes:
-  dbdata:
+  dbdata: 
+  app: 
+
 
 networks:
-      alln:
+      back:

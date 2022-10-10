@@ -28,3 +28,12 @@ type GroupMemember struct {
 	GroupId string `json: "group_id"`
 	UserId  string `json: "user_id"`
 }
+
+type ConversationStruct struct {
+	Id          int       `json:"id" db:"id"`
+	ChannelName string    `json:"channel_name" db:"channel_name"`
+	Title       string    `json:"title" db:"title" binding:"required"`
+	Description string    `json:"description" db:"description"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	CreatorId   int       `json:"creator_id" db:"creator_id"`
+}

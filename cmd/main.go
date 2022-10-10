@@ -2,7 +2,7 @@ package main
 
 import (
 	// _ "github.com/bmizerany/pq"
-	"os"
+	// "os"
 
 	"github.com/joho/godotenv"
 	meme "github.com/mihailco/memessenger"
@@ -21,16 +21,19 @@ func main() {
 	if err := initConfig(); err != nil {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
+
 	if err := godotenv.Load(); err != nil {
 		logrus.Fatalf("error in loading env: %s", err.Error())
 	}
+
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLmode:  viper.GetString("db.sslmode"),
-		Password: os.Getenv("DB_PASSWORD"),
+		// Password: os.Getenv("DB_PASSWORD"),
+		Password: viper.GetString("db.password"),
 	})
 
 	if err != nil {

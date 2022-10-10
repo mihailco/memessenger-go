@@ -10,13 +10,15 @@ type Authorization interface {
 	GenerateToken(username, password string) (string, error)
 	ParseToken(token string) (int, error)
 }
-type SendMessage interface {
-}
-type GetMessages interface {
+
+type Conversation interface {
+	Create(creatorId int, info meme.ConversationStruct) (int, error)
+	GetAll(id int) ([]meme.ConversationStruct, error)
 }
 
 type Service struct {
 	Authorization
+	Conversation
 	// SendMessage
 	// GetMessages
 }
@@ -24,5 +26,6 @@ type Service struct {
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
+		Conversation:  NewConversationService(repos),
 	}
 }
