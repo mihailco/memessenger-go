@@ -40,11 +40,10 @@ func main() {
 		logrus.Fatal("falled to init db: %s", err.Error())
 	}
 
-	hub := ws.NewHub()
-	go hub.Run()
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
-
+	hub := ws.NewHub(services)
+	go hub.Run()
 	handlers := handler.NewHandler(services, hub)
 
 	srv := new(meme.Server)

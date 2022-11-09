@@ -9,7 +9,7 @@ import (
 )
 
 func (h *Handler) signUp(c *gin.Context) {
-	var input meme.User
+	var input meme.Userlist
 
 	if err := c.BindJSON(&input); err != nil {
 		NewErrorResponse(c, http.StatusBadRequest, "invalid input body")

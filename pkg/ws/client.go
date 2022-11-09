@@ -2,6 +2,7 @@ package ws
 
 import (
 	"bytes"
+	"errors"
 	"log"
 	"time"
 
@@ -35,6 +36,7 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
+	id  int
 	hub *Hub
 
 	// The websocket connection.
@@ -96,7 +98,6 @@ func (c *Client) writePump() {
 				return
 			}
 			w.Write(message)
-
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
@@ -123,11 +124,30 @@ func ServeWs(hub *Hub, c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	id, err := getUserId(c)
+	if err != nil {
+		return
+	}
+	client := &Client{hub: hub, id: id, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
 	go client.writePump()
 	go client.readPump()
+}
+
+func getUserId(c *gin.Context) (int, error) {
+
+	id, ok := c.Get("userId")
+	if !ok {
+		return 0, errors.New("user id not found")
+	}
+
+	idInt, ok := id.(int)
+	if !ok {
+		return 0, errors.New("user id is of invalid type")
+	}
+
+	return idInt, nil
 }

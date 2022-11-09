@@ -1,8 +1,12 @@
 package ws
 
+import "github.com/mihailco/memessenger/pkg/service"
+
 type Hub struct {
 	// Registered clients.
-	clients map[*Client]bool
+	clients map[int]*Client
+
+	services *service.Service
 
 	// Inbound messages from the clients.
 	broadcast chan []byte
@@ -14,12 +18,13 @@ type Hub struct {
 	unregister chan *Client
 }
 
-func NewHub() *Hub {
+func NewHub(s *service.Service) *Hub {
 	return &Hub{
+		services:   s,
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		clients:    make(map[*Client]bool),
+		clients:    make(map[int]*Client),
 	}
 }
 
@@ -27,21 +32,30 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.register:
-			h.clients[client] = true
+			h.clients[client.id] = client
 		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
-				close(client.send)
-			}
+			delete(h.clients, client.id)
+			close(client.send)
 		case message := <-h.broadcast:
-			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
-			}
+			//вот тут хандлер
+			h.WSHandler(message)
+			// for _, client := range h.clients {
+			// 	select {
+			// 	case client.send <- message:
+
+			// 	default:
+			// 		close(client.send)
+			// 		delete(h.clients, client.id)
+			// 	}
+			// }
+			// for client := range h.clients {
+			// 	select {
+			// 	case client.send <- message:
+			// 	default:
+			// 		close(client.send)
+			// 		delete(h.clients, client)
+			// 	}
+			// }
 		}
 	}
 }

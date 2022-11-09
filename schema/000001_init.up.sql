@@ -26,7 +26,7 @@ CREATE TABLE messages
     id serial PRIMARY KEY,
     message_text VARCHAR(1000) not null,
     user_id_from int references users (id) on delete cascade not null,
-    conversation_id_To INT not null,
+    conversation_id_to INT not null,
     created_at timestamp not null,
     type_of_message VARCHAR(10) not null
 );

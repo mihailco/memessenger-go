@@ -12,7 +12,7 @@ test:
 	go test -v ./...
 
 migrate:
-	migrate -path ./schema -database 'postgres://postgres:postgrespw@localhost:8000?sslmode=disable' up
+	migrate -path ./schema -database 'postgres://postgres:postgrespw@localhost:5432?sslmode=disable' up
 
 swag:
 	swag init -g cmd/main.go

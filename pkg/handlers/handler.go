@@ -30,10 +30,18 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			logrus.Println("new user")
 			ws.ServeWs(h.hub, c)
 		})
-		lists := api.Group("/lists")
+
+		conversation := api.Group("/conversation")
 		{
-			lists.POST("/", h.createConversation)
-			lists.GET("/", h.getAllConversations)
+			conversation.POST("/", h.createConversation)
+			conversation.GET("/", h.getAllConversations)
+			conversation.PUT("/:id", h.UpdateById)
+			conversation.DELETE("/:id", h.DeleteById)
+			user := conversation.Group("/user")
+			{
+				user.GET("/:id", h.GetAllUsersAtConv)
+				user.GET("/", h.AddUserAtConv)
+			}
 		}
 	}
 	return router
